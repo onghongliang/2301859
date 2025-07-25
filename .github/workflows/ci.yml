@@ -37,17 +37,11 @@ jobs:
         path: dependency-check-report
     
     - name: Run ESLint Security Scan
-      run: |
-        npm install eslint eslint-plugin-security --save-dev
-        mkdir -p reports
-        ./node_modules/.bin/eslint . --ext .js --format json --output-file reports/eslint-report.json
-        ./node_modules/.bin/eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif
-
-    - name: Upload ESLint Reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: ESLint-Reports
-        path: reports/eslint-*
+        run: |
+          mkdir -p reports
+          chmod +x ./node_modules/.bin/eslint
+          ./node_modules/.bin/eslint . --ext .js --format json --output-file reports/eslint-report.json
+          ./node_modules/.bin/eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif
 
     
     - name: Run SonarQube Scan
