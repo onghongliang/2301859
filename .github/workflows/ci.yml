@@ -39,8 +39,14 @@ jobs:
     - name: Run ESLint Security Scan
       run: |
         npm install eslint eslint-plugin-security --save-dev
-
-        npx eslint . --ext .js
+        ./node_modules/.bin/eslint . --ext .js --format json --output-file eslint-report.json
+        ./node_modules/.bin/eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
+    
+    - name: Upload ESLint Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: ESLint-Report
+        path: eslint-results.sarif
     
 
     
