@@ -18,6 +18,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-security": "^1.7.1",
     "mocha": "^10.8.2",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "@microsoft/eslint-formatter-sarif": "^3.0.0"
   }
 }
