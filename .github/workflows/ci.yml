@@ -36,26 +36,6 @@ jobs:
         name: Dependency-Check-Report
         path: dependency-check-report
     
-    - name: Run ESLint Security Scan
-      run: |
-          mkdir -p reports
-          chmod +x ./node_modules/.bin/eslint
-          ./node_modules/.bin/eslint . --ext .js --format json --output-file reports/eslint-report.json
-          ./node_modules/.bin/eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif
-
-    
-    - name: Run SonarQube Scan
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      run: |
-        docker run --rm --network host \
-          -v "$(pwd):/usr/src" \
-          sonarsource/sonar-scanner-cli \
-          -Dsonar.projectKey=webapp \
-          -Dsonar.sources=/usr/src \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_TOKEN
     
     - name: Run Selenium UI Tests
       uses: actions/setup-java@v3
@@ -71,3 +51,23 @@ jobs:
       run: |
         npm install selenium-webdriver
         node tests/ui-test.js
+
+    - name: Run ESLint Security Scan
+      run: |
+          mkdir -p reports
+          chmod +x ./node_modules/.bin/eslint
+          ./node_modules/.bin/eslint . --ext .js --format json --output-file reports/eslint-report.json
+          ./node_modules/.bin/eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif
+
+    - name: Run SonarQube Scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      run: |
+        docker run --rm --network host \
+          -v "$(pwd):/usr/src" \
+          sonarsource/sonar-scanner-cli \
+          -Dsonar.projectKey=webapp \
+          -Dsonar.sources=/usr/src \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_TOKEN
