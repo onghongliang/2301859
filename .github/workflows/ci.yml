@@ -11,7 +11,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 20
     
     - name: Install dependencies
       run: npm install
@@ -35,8 +35,15 @@ jobs:
       with:
         name: Dependency-Check-Report
         path: dependency-check-report
+        
+    - name: Run UI Tests
+      run: |
+        npm install selenium-webdriver
+        node tests/ui-test.js
     
-    
+    - name: Start Web Application
+      run: npm start &
+
     - name: Run Selenium UI Tests
       uses: actions/setup-java@v3
       with:
@@ -48,10 +55,7 @@ jobs:
         docker run -d -p 4444:4444 --name selenium-server selenium/standalone-chrome
         sleep 10 # Wait for server to start
     
-    - name: Run UI Tests
-      run: |
-        npm install selenium-webdriver
-        node tests/ui-test.js
+
 
     - name: Run ESLint Security Scan
       run: |

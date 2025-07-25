@@ -8,7 +8,7 @@ const { Builder, By, until } = require('selenium-webdriver');
     
     try {
         // Test normal search
-        await driver.get('http://webapp:3000/');
+        await driver.get('http://localhost:3000/');
         await driver.findElement(By.id('searchTerm')).sendKeys('safe search');
         await driver.findElement(By.css('button[type="submit"]')).click();
         
@@ -18,7 +18,7 @@ const { Builder, By, until } = require('selenium-webdriver');
         console.log('Normal search test passed:', resultText.includes('safe search'));
         
         // Test XSS attempt
-        await driver.get('http://webapp:3000/');
+        await driver.get('http://localhost:3000/');
         await driver.findElement(By.id('searchTerm')).sendKeys('<script>alert(1)</script>');
         await driver.findElement(By.css('button[type="submit"]')).click();
         
