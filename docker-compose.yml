@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Web server (Node.js application)
+  webapp:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - git-server
+      - sonarqube
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  # Git server
+  git-server:
+    image: gogs/gogs
+    ports:
+      - "3001:3000"
+      - "2222:22"
+    volumes:
+      - git-data:/data
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    networks:
+      - app-network
+
+  # SonarQube
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:h2:tcp://localhost:9092/sonar
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=sonar
+      - SONAR_ADMIN_PASSWORD=2301859@sit.singaporetech.edu.sg
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database for SonarQube
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  git-data:
+  sonarqube_data:
+  sonarqube_extensions:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
