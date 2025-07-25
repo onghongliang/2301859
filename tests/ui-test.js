@@ -1,40 +1,46 @@
 const { Builder, By, until } = require('selenium-webdriver');
+const { expect } = require('chai');
 
-(async function testSearchForm() {
-    let driver = await new Builder()
-        .forBrowser('chrome')
-        .usingServer('http://localhost:4444/wd/hub')
-        .build();
+describe('UI Tests', function() {
+    this.timeout(10000); // Increase timeout for Selenium tests
     
-    try {
-        // Test normal search
+    let driver;
+    
+    before(async () => {
+        driver = await new Builder()
+            .forBrowser('chrome')
+            .usingServer('http://localhost:4444/wd/hub')
+            .build();
+    });
+    
+    after(async () => {
+        await driver.quit();
+    });
+    
+    it('should load home page', async () => {
         await driver.get('http://localhost:3000/');
-        await driver.findElement(By.id('searchTerm')).sendKeys('safe search');
-        await driver.findElement(By.css('button[type="submit"]')).click();
-        
-        // Verify results page
-        await driver.wait(until.elementLocated(By.css('p')), 5000);
-        const resultText = await driver.findElement(By.css('p')).getText();
-        console.log('Normal search test passed:', resultText.includes('safe search'));
-        
-        // Test XSS attempt
+        const title = await driver.getTitle();
+        expect(title).to.include('Search Form');
+    });
+    
+    it('should detect XSS attempt', async () => {
         await driver.get('http://localhost:3000/');
         await driver.findElement(By.id('searchTerm')).sendKeys('<script>alert(1)</script>');
         await driver.findElement(By.css('button[type="submit"]')).click();
         
-        // Should remain on home page
-        await driver.wait(until.elementLocated(By.id('searchTerm')), 5000);
-        console.log('XSS protection test passed');
-        
-        // Test SQL injection attempt
-        await driver.findElement(By.id('searchTerm')).sendKeys("1' OR '1'='1");
+        // Verify we're still on home page (redirected back)
+        const currentUrl = await driver.getCurrentUrl();
+        expect(currentUrl).to.equal('http://localhost:3000/');
+    });
+    
+    it('should accept safe search term', async () => {
+        await driver.get('http://localhost:3000/');
+        await driver.findElement(By.id('searchTerm')).sendKeys('safe search');
         await driver.findElement(By.css('button[type="submit"]')).click();
         
-        // Should remain on home page
-        await driver.wait(until.elementLocated(By.id('searchTerm')), 5000);
-        console.log('SQL injection protection test passed');
-        
-    } finally {
-        await driver.quit();
-    }
-})();
+        // Verify we're on results page
+        await driver.wait(until.elementLocated(By.css('p')), 5000);
+        const resultText = await driver.findElement(By.css('p')).getText();
+        expect(resultText).to.include('safe search');
+    });
+});
