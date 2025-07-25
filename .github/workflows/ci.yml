@@ -39,6 +39,7 @@ jobs:
     - name: Run ESLint Security Scan
       run: |
         npm install eslint eslint-plugin-security --save-dev
+        chmod +x ./node_modules/.bin/eslint
         npx eslint . --ext .js --format json --output-file eslint-report.json
         npx eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
     
